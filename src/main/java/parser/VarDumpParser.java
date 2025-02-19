@@ -17,13 +17,17 @@ public class VarDumpParser {
     }
 
     private List<String> preprocessInput(String input) {
-        String[] rawLines = input.split("\\r?\\n");
+        String[] rawLines = input.split("\n");
         if (rawLines.length == 1) {
-            input = input.replaceAll("(?<=\\{)", "\n")
+            input = input
+                    .replaceAll("(?<=\\{)", "\n")
                     .replaceAll("(?=\\})", "\n")
-                    .replaceAll("(?<==>)", "\n");
+                    .replaceAll("(?<=\\})", "\n")
+                    .replaceAll("(?<==>)", "\n")
+                    .replaceAll("(?=\\[)", "\n")
+                    .replaceAll("\\n+", "\n");
         }
-        return Arrays.asList(input.split("\\r?\\n"));
+        return Arrays.asList(input.split("\n"));
     }
 
     private PHPValue parseValue(List<String> lines, Index index) {
@@ -52,14 +56,14 @@ public class VarDumpParser {
                 return new PHPObject(Boolean.parseBoolean(m.group(1)));
             }
         } else if (line.startsWith("float(")) {
-            Pattern pattern = Pattern.compile("float\\(([-+]?\\d*\\.?\\d+)\\)");
+            Pattern pattern = Pattern.compile("float\\((\\d+\\.\\d+)\\)");
             Matcher m = pattern.matcher(line);
             if (m.find()) {
                 index.i++;
                 return new PHPObject(Double.parseDouble(m.group(1)));
             }
         } else if (line.startsWith("NULL")) {
-            index.i++;
+                index.i++;
             return new PHPObject(null);
         }
         index.i++;
@@ -74,18 +78,13 @@ public class VarDumpParser {
             index.i++;
         }
 
-        if (index.i < lines.size() && lines.get(index.i).trim().equals("}")) {
-            index.i++;
-            return array;
-        }
-
         while (index.i < lines.size()) {
             String line = lines.get(index.i).trim();
             if (line.equals("}")) {
                 index.i++;
-                break;
+                return array;
             }
-            Pattern keyPattern = Pattern.compile("\\[(\"([^\"]+)\"|(\\d+))\\]=>");
+            Pattern keyPattern = Pattern.compile("\\[(\"(.+?)\"|(\\d+))]=>");
             Matcher m = keyPattern.matcher(line);
             if (m.find()) {
                 Object key;
@@ -107,7 +106,7 @@ public class VarDumpParser {
     public String toPHPCode(PHPValue value) {
         StringBuilder sb = new StringBuilder();
         sb.append("<?php\n\n");
-        sb.append("$array = \n");
+        sb.append("$array = ");
         sb.append(value.toPHPString(0));
         sb.append(";\n\n");
         sb.append("var_dump($array);");

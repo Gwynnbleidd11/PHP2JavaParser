@@ -15,23 +15,27 @@ public class PHPArray implements PHPValue {
     public String toPHPString(int indent) {
         StringBuilder sb = new StringBuilder();
         String indentStr = "    ".repeat(indent);
-        sb.append("[\n");
-        int count = 0;
-        int size = elements.size();
-        for (Map.Entry<Object, PHPValue> entry : elements.entrySet()) {
-            sb.append(indentStr).append("    ");
-            if (entry.getKey() instanceof String) {
-                sb.append("'").append(entry.getKey()).append("' => ");
+        if (elements.isEmpty()) {
+            sb.append("[]");
+        } else {
+            sb.append("[\n");
+            int count = 0;
+            int size = elements.size();
+            for (Map.Entry<Object, PHPValue> entry : elements.entrySet()) {
+                sb.append(indentStr).append("    ");
+                if (entry.getKey() instanceof String) {
+                    sb.append("'").append(entry.getKey()).append("' => ");
+                }
+                sb.append(entry.getValue().toPHPString(indent + 1));
+                count++;
+                if (count < size) {
+                    sb.append(",\n");
+                } else {
+                    sb.append("\n");
+                }
             }
-            sb.append(entry.getValue().toPHPString(indent + 1));
-            count++;
-            if (count < size) {
-                sb.append(",\n");
-            } else {
-                sb.append("\n");
-            }
+            sb.append(indentStr).append("]");
         }
-        sb.append(indentStr).append("]");
         return sb.toString();
     }
 }
