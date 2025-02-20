@@ -1,9 +1,12 @@
 package com.application.parser;
 
+import org.springframework.stereotype.Component;
+
 import java.util.*;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
+@Component
 public class VarDumpParser {
 
     private static class Index {
