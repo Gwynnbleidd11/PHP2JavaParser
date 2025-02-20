@@ -1,4 +1,4 @@
-package parser;
+package com.application.parser;
 
 import java.util.*;
 import java.util.regex.Matcher;

@@ -1,4 +1,4 @@
-package parser;
+package com.application.parser;
 
 import java.util.LinkedHashMap;
 import java.util.Map;

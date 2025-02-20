@@ -1,4 +1,4 @@
-package parser;
+package com.application.parser;
 
 public class PHPObject implements PHPValue {
 

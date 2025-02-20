@@ -1,4 +1,4 @@
-package parser;
+package com.application.parser;
 
 import org.junit.jupiter.api.Test;
 
