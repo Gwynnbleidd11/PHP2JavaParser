@@ -3,16 +3,20 @@ package com.application.parser;
 import java.util.LinkedHashMap;
 import java.util.Map;
 
-public class PHPArray implements PHPValue {
+public class PhpArray implements PhpValue {
 
-    private final Map<Object, PHPValue> elements = new LinkedHashMap<>();
+    private final Map<Object, PhpValue> elements = new LinkedHashMap<>();
 
-    public void put(Object key, PHPValue value) {
+    public void put(Object key, PhpValue value) {
         elements.put(key, value);
     }
 
+    public Map<Object, PhpValue> getElements() {
+        return elements;
+    }
+
     @Override
-    public String toPHPString(int indent) {
+    public String toPhpString(int indent) {
         StringBuilder sb = new StringBuilder();
         String indentStr = "    ".repeat(indent);
         if (elements.isEmpty()) {
@@ -21,12 +25,12 @@ public class PHPArray implements PHPValue {
             sb.append("[\n");
             int count = 0;
             int size = elements.size();
-            for (Map.Entry<Object, PHPValue> entry : elements.entrySet()) {
+            for (Map.Entry<Object, PhpValue> entry : elements.entrySet()) {
                 sb.append(indentStr).append("    ");
                 if (entry.getKey() instanceof String) {
                     sb.append("'").append(entry.getKey()).append("' => ");
                 }
-                sb.append(entry.getValue().toPHPString(indent + 1));
+                sb.append(entry.getValue().toPhpString(indent + 1));
                 count++;
                 if (count < size) {
                     sb.append(",\n");

@@ -1,15 +1,15 @@
 package com.application.parser;
 
-public class PHPObject implements PHPValue {
+public class PhpObject implements PhpValue {
 
     private final Object value;
 
-    public PHPObject(Object value) {
+    public PhpObject(Object value) {
         this.value = value;
     }
 
     @Override
-    public String toPHPString(int indent) {
+    public String toPhpString(int indent) {
         if (value == null) {
             return "null";
         } else if (value instanceof String) {
@@ -17,5 +17,9 @@ public class PHPObject implements PHPValue {
         } else {
             return value.toString();
         }
+    }
+
+    public Object getValue() {
+        return value;
     }
 }

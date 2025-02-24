@@ -19,8 +19,8 @@ class VarDumpParserTest {
         VarDumpParser parser = new VarDumpParser();
 
         //When
-        PHPValue parsedArray = parser.parseVarDump(inputString);
-        String phpCode = parser.toPHPCode(parsedArray);
+        PhpValue parsedArray = parser.parseVarDump(inputString);
+        String phpCode = parser.toPhpCode(parsedArray);
 
         //Then
         assertEquals(
