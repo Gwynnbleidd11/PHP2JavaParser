@@ -1,6 +1,6 @@
 package com.application.service;
 
-import com.application.parser.PHPValue;
+import com.application.parser.PhpValue;
 import com.application.parser.VarDumpParser;
 import org.springframework.stereotype.Service;
 
@@ -13,8 +13,8 @@ public class ParserService {
         this.parser = parser;
     }
 
-    public String processVarDumpString (final String inputString) {
-        PHPValue parsedArray = parser.parseVarDump(inputString);
-        return parser.toPHPCode(parsedArray);
+    public String processVarDumpString(final String inputString) {
+        PhpValue parsedArray = parser.parseVarDump(inputString);
+        return parser.toPhpCode(parsedArray);
     }
 }

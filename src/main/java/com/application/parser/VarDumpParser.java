@@ -13,7 +13,7 @@ public class VarDumpParser {
         int i = 0;
     }
 
-    public PHPValue parseVarDump(String input) {
+    public PhpValue parseVarDump(String input) {
         List<String> lines = preprocessInput(input);
         Index index = new Index();
         return parseValue(lines, index);
@@ -33,7 +33,7 @@ public class VarDumpParser {
         return Arrays.asList(input.split("\n"));
     }
 
-    private PHPValue parseValue(List<String> lines, Index index) {
+    private PhpValue parseValue(List<String> lines, Index index) {
         String line = lines.get(index.i).trim();
         if (line.startsWith("array(")) {
             return parseArray(lines, index);
@@ -42,40 +42,40 @@ public class VarDumpParser {
             Matcher m = pattern.matcher(line);
             if (m.find()) {
                 index.i++;
-                return new PHPObject(m.group(1));
+                return new PhpObject(m.group(1));
             }
         } else if (line.startsWith("int(")) {
             Pattern pattern = Pattern.compile("int\\((\\d+)\\)");
             Matcher m = pattern.matcher(line);
             if (m.find()) {
                 index.i++;
-                return new PHPObject(Integer.parseInt(m.group(1)));
+                return new PhpObject(Integer.parseInt(m.group(1)));
             }
         } else if (line.startsWith("bool(")) {
             Pattern pattern = Pattern.compile("bool\\((true|false)\\)");
             Matcher m = pattern.matcher(line);
             if (m.find()) {
                 index.i++;
-                return new PHPObject(Boolean.parseBoolean(m.group(1)));
+                return new PhpObject(Boolean.parseBoolean(m.group(1)));
             }
         } else if (line.startsWith("float(")) {
             Pattern pattern = Pattern.compile("float\\((\\d+\\.\\d+)\\)");
             Matcher m = pattern.matcher(line);
             if (m.find()) {
                 index.i++;
-                return new PHPObject(Double.parseDouble(m.group(1)));
+                return new PhpObject(Double.parseDouble(m.group(1)));
             }
         } else if (line.startsWith("NULL")) {
                 index.i++;
-            return new PHPObject(null);
+            return new PhpObject(null);
         }
         index.i++;
-        return new PHPObject(null);
+        return new PhpObject(null);
     }
 
-    private PHPArray parseArray(List<String> lines, Index index) {
+    private PhpArray parseArray(List<String> lines, Index index) {
         index.i++;
-        PHPArray array = new PHPArray();
+        PhpArray array = new PhpArray();
 
         while (index.i < lines.size() && lines.get(index.i).trim().isEmpty()) {
             index.i++;
@@ -97,7 +97,7 @@ public class VarDumpParser {
                     key = Integer.parseInt(m.group(3));
                 }
                 index.i++;
-                PHPValue value = parseValue(lines, index);
+                PhpValue value = parseValue(lines, index);
                 array.put(key, value);
             } else {
                 index.i++;
@@ -106,11 +106,11 @@ public class VarDumpParser {
         return array;
     }
 
-    public String toPHPCode(PHPValue value) {
+    public String toPhpCode(PhpValue value) {
         StringBuilder sb = new StringBuilder();
         sb.append("<?php\n\n");
         sb.append("$array = ");
-        sb.append(value.toPHPString(0));
+        sb.append(value.toPhpString(0));
         sb.append(";\n\n");
         sb.append("var_dump($array);");
         return sb.toString();
