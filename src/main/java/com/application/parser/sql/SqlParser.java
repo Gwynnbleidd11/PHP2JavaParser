@@ -8,12 +8,12 @@ import org.springframework.stereotype.Component;
 
 import java.util.*;
 
-@Component
-public class SqlParser implements SqlValue {
+    @Component
+    public class SqlParser implements SqlValue {
 
-    private final VarDumpParser parser;
+        private final VarDumpParser parser;
 
-    public SqlParser(VarDumpParser parser) {
+        public SqlParser(VarDumpParser parser) {
         this.parser = parser;
     }
 
@@ -21,12 +21,17 @@ public class SqlParser implements SqlValue {
     public String toSqlString(String inputString) {
         StringBuilder sqlString = new StringBuilder();
         PhpValue rootValue = parser.parseVarDump(inputString);
-        PhpArray rootArray = (PhpArray)rootValue;
+        PhpArray rootArray = (PhpArray) rootValue;
+
+        if (rootArray.getElements().isEmpty()) {
+            return "No data in var_dump() output to create SQL QUERY";
+        }
 
         for (Map.Entry<Object, PhpValue> tableEntry : rootArray.getElements().entrySet()) {
-            String tableName = (String) tableEntry.getKey();
+            String tableName = tableEntry.getKey().toString();
+            PhpArray tableData = (PhpArray) tableEntry;
 
-            List<Map<String, PhpValue>> rowList = extractRows((PhpArray) tableEntry.getValue());
+            List<Map<String, PhpValue>> rowList = extractRows(tableData);
 
             List<String> allColumns = new ArrayList<>();
             for (Map<String, PhpValue> row : rowList) {
@@ -38,17 +43,16 @@ public class SqlParser implements SqlValue {
                     .append(" (")
                     .append(String.join(", ", allColumns))
                     .append(") VALUES ");
-
+            List<String> rowStrings = new ArrayList<>();
             for (Map<String, PhpValue> row : rowList) {
                 List<String> values = new ArrayList<>();
                 for (String column : allColumns) {
                     values.add(extractSqlValue(row.get(column)));
                 }
-                sqlString.append("(")
-                        .append(String.join(", ", values))
-                        .append(")")
-                        .append(";");
+                rowStrings.add("(" + String.join(", ", values) + ")");
             }
+            sqlString.append(String.join(",\n", rowStrings))
+                    .append(";\n");
         }
         return sqlString.toString();
     }
@@ -93,28 +97,40 @@ public class SqlParser implements SqlValue {
     }
 
     private static boolean isRowCollection(Map<Object, PhpValue> dataElements) {
-        boolean isRowCollection = true;
         for (Object key : dataElements.keySet()) {
             if (!(key instanceof Number)) {
-                isRowCollection = false;
-                break;
+                return false;
             }
         }
-        return isRowCollection;
+        return true;
     }
 
     private String extractSqlValue(PhpValue value) {
-        Object object = ((PhpObject)value).getValue();
-        if (object == null) {
+        if (value == null) {
             return "NULL";
-        } else if (object instanceof Boolean) {
-            return (Boolean) object ? "TRUE" : "FALSE";
-        } else if (object instanceof Number) {
-            return object.toString();
-        } else {
-            String string = object.toString();
-            string = string.replace("'", "''");
-            return "'" + string + "'";
         }
+        if (value instanceof PhpArray array) {
+            if (array.getElements().size() == 1 && array.getElements().containsKey("0")) {
+                return extractSqlValue(array.getElements().get("0"));
+            } else {
+                String arrayString = array.toString().replace("'", "''");
+                return "'" + arrayString + "'";
+            }
+        }
+        if (value instanceof PhpObject) {
+            Object object = ((PhpObject) value).getValue();
+            if (object == null) {
+                return "NULL";
+            } else if (object instanceof Boolean) {
+                return (Boolean) object ? "TRUE" : "FALSE";
+            } else if (object instanceof Number) {
+                return object.toString();
+            } else {
+                String string = object.toString().replace("'", "''");
+                return "'" + string + "'";
+            }
+        }
+        String fallback = value.toString().replace("'", "''");
+        return "'" + fallback + "'";
     }
 }

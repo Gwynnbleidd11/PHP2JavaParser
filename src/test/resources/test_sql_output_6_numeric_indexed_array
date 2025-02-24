@@ -1,3 +1,3 @@
-INSERT INTO values (string) VALUES ('apple');
-INSERT INTO values (string) VALUES ('banana');
-INSERT INTO values (string) VALUES ('cherry');
+INSERT INTO values (string) VALUES ('apple'),
+('banana'),
+('cherry');
